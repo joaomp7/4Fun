@@ -1,0 +1,90 @@
+#!/bin/bash
+
+printf "USAGE: jhclass [class without extension .java]\n"
+
+if [[ $# -eq 0 ]]
+then
+    printf "Is necessary at least one (1) argument.\n"  
+    exit    
+fi
+
+tab="\x20\x20\x20\x20"
+
+
+for class_name in $@
+do 
+    echo -e "public class $class_name\n{" >> $class_name".java"
+
+    declare -i index
+    declare -a class_attr variables types
+ 
+    while [[ $variable != "quit" ]]
+    do
+        printf "'quit' for stop input attributes.\nWrite a variable in a class $class_name.: "
+        read variable
+        if [[ $variable == "quit" ]]
+        then
+            break
+        fi
+        variables[index]=$variable
+    
+        printf "Write a type of $variable: "
+        read type_var
+        types[index]=$type_var
+        
+        class_attr[index]="${types[index]} ${variables[index]}"
+
+        echo -e "$tab private ${class_attr[index]};" >> $class_name".java"
+
+        index+=1
+    done
+    unset index
+
+    echo -e "$tab public $class_name(){\n" >> $class_name".java"    
+        
+    for variable in ${variables[@]}
+    do
+        echo -e "$tab$tab this.$variable = $variable;" >> $class_name".java"
+    done
+        
+    echo -e "$tab }" >> $class_name".java"
+
+    printf "Generate constructor with parameters? [Y/n]"
+    read decision
+
+    if [[ ${decision,,} == "y" ]]
+    then
+        parameters=""
+
+        for(( i=0 ; i < ${#variables[@]} ; i++ ))
+        do
+            parameters+="${class_attr[$i]},"
+        done
+
+        echo -e "$tab public $class_name(${parameters%","}){\n" >> $class_name".java"
+        unset parameters
+    
+        for variable in ${variables[@]}
+        do
+            echo -e "$tab$tab this.$variable = $variable;" >> $class_name".java"
+        done
+        
+        echo -e "$tab }" >> $class_name".java"
+    fi
+
+    printf "Generate getters and setters? [Y/n]"
+    read decision
+
+    if [[ $decision == "y" || $decision == "Y" ]]
+    then
+        for(( i=0 ; i < ${#variables[@]} ; i++ ))
+        do
+            echo -e "$tab public void set${variables[i]^}(${types[i]} ${variables[i]}){" >> $class_name".java"
+            echo -e "$tab$tab this.${variables[i]} = ${variables[i]};\n$tab}" >> $class_name".java"
+
+            echo -e "$tab public ${types[i]} get${variables[i]^}(){" >> $class_name".java"
+            echo -e "$tab$tab return ${variables[i]};\n$tab}" >> $class_name".java"
+        done
+    fi
+    echo -e "}" >> $class_name".java"
+done
