@@ -1,7 +1,12 @@
-context = document.getElementById("folha").getContext("2d");
+var context = new Array();
 
 var HTMLIdShapes = ["triangle_cyan", "triangle_orange", "triangle_blue", "triangle_yellow",
                 "triangle_green", "polygon", "square"];
+
+for(var i = 0; i < HTMLIdShapes.length; i++)
+{
+    context[i] = document.getElementById("folha").getContext("2d");
+}
 
 var shapes = [];
 
@@ -29,7 +34,7 @@ window.onload = function()
 function drawShape()
 {
     for(var i = 0; i < shapes.length; i++)
-        context.drawImage(shapes[i], coordsX[i], coordsY[i]);
+        context[i].drawImage(shapes[i], coordsX[i], coordsY[i]);
 }
 
 function selectShape(event)

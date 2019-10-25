@@ -61,13 +61,38 @@ function validadeCartao()
     }
 }
 
-$inicio = $_REQUEST["inicio"]; 
+/*$inicio = $_REQUEST["inicio"]; 
 $lista  = $_REQUEST["lista"];
 $top10  = $_REQUEST["top10"];
 $cartao = $_REQUEST["cartao"];
-$final = $_REQUEST["final"];
+$final  = $_REQUEST["final"];*/
 
-if($inicio === "okay")
+$valor = $_REQUEST["shot"];
+
+switch($valor)
+{
+    case "okay":
+        $respid = iniciarCompra();
+        if($respid != null)
+            echo "{'id':".$respid."}";
+        else
+            echo null;
+        break;
+    
+    case "lista":
+        echo listaDeMercadoriasJSON();
+        break;
+
+    case "ranking":
+        echo rankingJSON();
+        break;
+
+    case "cartao":
+        echo validadeCartao();
+        break;
+}
+
+/*if($inicio === "okay")
 {
     $respid = iniciarCompra();
     if($respid != null)
@@ -90,6 +115,6 @@ if($cartao == "cartao")
 if($final != "null")
 {
     $carrinho = json_decode($final);
-}
+}*/
 
 ?>

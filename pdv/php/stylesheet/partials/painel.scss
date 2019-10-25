@@ -1,0 +1,17 @@
+@import "../modules/vars.scss";
+
+body
+{
+    background-color: $fundo;
+    display: flex;
+    flex-direction: row;
+}
+
+textarea
+{
+    height: $textarea_altura;
+    width: $textarea_largura;
+
+    margin-right: 30px;
+    margin-left: 30px;
+}

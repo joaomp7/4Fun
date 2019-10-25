@@ -1,4 +1,4 @@
-var novaCompra = null;
+/*var novaCompra = null;
 var fecharCompra = null;
 var totalCompra = null;
 var fecharPdv = null;
@@ -10,11 +10,11 @@ var cancelaMercadoria = null;
 var exibirLista = null;
 var top10 = null;
 
-var textArea = null;
+var textArea = null;*/
 var carrinho = new Array();
 
 var lista;
-var compra;
+var compra; // tratar posteriormente
 var opcaoPgto;
 
 window.onload = function()
@@ -36,26 +36,46 @@ window.onload = function()
     opcaoPgto = null;
 }
 
+///ft
+var receptor = function(valor, sender)
+{
+    return new Promise(function(resolve, reject)
+    {
+        var xmlhttp = new XMLHttpRequest();
+
+        xmlhttp.onreadystatechange = function() 
+        {
+            if(this.readyState === 4)
+            {
+                if(this.status === 200)
+                    resolve(this.responseText);
+                else
+                    reject("Request error.");
+            }
+        };
+        xmlhttp.open("GET", "PontoDeVenda.php?shot="+valor, true);
+        xmlhttp.send(sender);
+    });
+}
+///ft
+
 function iniciarCompra()
 {
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function() 
-    {
-        if(this.readyState == 4 && this.status == 200)
+    receptor("okay")
+        .then(function(response)
         {
-            if(this.responseText != null ||
-                this.responseText != "")
+            if(response || response != "")
             {
-                compra = this.responseText;
+                compra = response;
                 novaCompra.disabled = true;
                 habilitarBotoes(true);
                 textArea.value = cabecalho();
             }
-        }
-    };
-    xmlhttp.open("GET", "PontoDeVenda.php?inicio=okay", true);
-    xmlhttp.send();
+        })
+        .catch(function(error)
+        {
+            alert(error);
+        });
 }
 
 function cancelarCompra()
@@ -77,18 +97,15 @@ function tipoPagamento() // Provavelmente irei apagar depois.
 
 function fecharCompra()
 {
-    let opcaoPgto = tipoPagamento();
-
-    if(opcaoPgto == 'dinheiro')
+    switch(tipoPagamento())
     {
-        let valorMonetario = parseFloat(prompt("Digite o valor em dinheiro"));
-
-        alert("Troco: " + (valorMonetario - totalCompra.value));
-    }
-
-    if(opcaoPgto == 'cartao')
-    {
-        verificarCartao();
+        case 'dinheiro':
+            let valorMonetario = parseFloat(prompt("Digite o valor em dinheiro"));
+            alert("Troco: " + (valorMonetario - totalCompra.value));
+            break;
+        case 'cartao':
+            verificarCartao();
+            break;
     }
 }
 
@@ -138,16 +155,15 @@ function cancelarMercadoria()
 
 function exibirMercadorias()
 {
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() 
-    {
-        if (this.readyState == 4 && this.status == 200)
-            if(this.responseText != "null")
-                formatarLista(this.responseText);
-    };
-    
-    xmlhttp.open("GET", "PontoDeVenda.php?lista=lista", true);
-    xmlhttp.send();
+    receptor("lista")
+        .then(function(response)
+        {
+            formatarLista(response);
+        })
+        .catch(function(error)
+        {
+            alert(error);
+        });
 }
 
 function exibirTop10()
@@ -231,25 +247,16 @@ function formatarLista(JSONtxt)
 
 function exibirTop10JSON()
 {
-    var rank = null;
-    var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function()
+    receptor("ranking")
+        .then(function(response)
         {
-            if (this.readyState == 4)
-            {
-                if(this.status == 200)
-                {
-                    if(this.responseText != "null")
-                    {
-                        rank = this.responseText;
-                    }
-                }
-            }
-        };
-        xmlhttp.open("GET", "PontoDeVenda.php?top10=ranking", true);
-        xmlhttp.send(null);
-
-    return rank;
+            return response;
+        })
+        .catch(function(error)
+        {
+            alert(error);
+            return null;
+        });
 }
 
 function adicionarAoCarrinho(item)
@@ -322,22 +329,16 @@ function removerUnidadeMercadoria()
 
 function verificarCartao()
 {
-    let xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() 
-    {
-        if (this.readyState == 4 && this.status == 200)
+    receptor("cartao")
+        .then(function(response)
         {
-            if(this.responseText == "true")
-            {
-                alert("TRANSAÇÃO AUTORIZADA");
-                enviarCompra();
-            }
-            else
-                alert("TRANSAÇÃO NÃO AUTORIZADA");
-        }
-    };
-    xmlhttp.open("GET", "PontoDeVenda.php?cartao=cartao", true);
-    xmlhttp.send();
+            alert("TRANSAÇÃO AUTORIZADA");
+            enviarCompra();
+        })
+        .catch(function(error)
+        {
+            alert("TRANSAÇÃO NÃO AUTORIZADA");
+        });
 }
 
 function enviarCompra()
